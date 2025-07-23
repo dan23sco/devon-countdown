@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Countdown with Flags</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Cinzel:wght@700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Orbitron', sans-serif;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: black;
+      position: relative;
+    }
+
+    #flags {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .flag-half {
+      flex: 1;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .eu-flag {
+      background-image: url('https://flagcdn.com/w320/eu.png');
+    }
+
+    .us-flag {
+      background-image: url('https://flagcdn.com/w320/us.png');
+    }
+
+    #countdown {
+      z-index: 1;
+      font-size: 6vw;
+      color: #00ff00;
+      text-shadow:
+        0 0 10px #00ff00,
+        0 0 20px #00ff00,
+        0 0 30px #00ff00;
+      padding: 1rem 2rem;
+      background-color: rgba(0, 0, 0, 0.7);
+      border: 3px solid #00ff00;
+      border-radius: 20px;
+      position: relative;
+    }
+
+    #final-stage {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    #logo {
+      max-width: 400px;
+      opacity: 0;
+      transition: all 2s ease;
+      filter: drop-shadow(0 0 15px orange);
+      z-index: 3;
+    }
+
+    #logo.show {
+      opacity: 1;
+    }
+
+    #message {
+      font-family: 'Cinzel', serif;
+      color: orange;
+      font-size: 3vw;
+      opacity: 0;
+      text-shadow: 0 0 10px red, 0 0 30px orange;
+      margin-top: 2rem;
+      transition: opacity 2s ease;
+      z-index: 3;
+      white-space: pre-line;
+    }
+
+    #message.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Flags background layer -->
+  <div id="flags">
+    <div class="flag-half eu-flag"></div>
+    <div class="flag-half us-flag"></div>
+  </div>
+
+  <!-- Countdown timer -->
+  <div id="countdown">Loading...</div>
+
+  <!-- Final stage slideshow / logo / message -->
+  <div id="final-stage">
+    <video id="slideshow" src="saunton-slideshow.mp4" preload="auto" playsinline></video>
+    <img id="logo" src="logo.jpg" alt="Logo" />
+    <div id="message">Coming to you\n26 September 2025</div>
+  </div>
+
+  <!-- Audio elements -->
+  <audio id="countdownMusic" src="countdown-loop.m4a" preload="auto" loop></audio>
+  <audio id="wallsMusic" src="breaking-down-walls.m4a" preload="auto"></audio>
+  <audio id="boomSound" src="cinematic-boom.mp3" preload="auto"></audio>
+
+  <script>
+    const countdownEl = document.getElementById('countdown');
+    const finalStage = document.getElementById('final-stage');
+    const slideshow = document.getElementById('slideshow');
+    const logo = document.getElementById('logo');
+    const message = document.getElementById('message');
+
+    const countdownMusic = document.getElementById('countdownMusic');
+    const wallsMusic = document.getElementById('wallsMusic');
+    const boomSound = document.getElementById('boomSound');
+
+    window.addEventListener('load', () => {
+      countdownMusic.play().catch(() => {});
+    });
+
+    const target = new Date("2025-07-25T13:00:00");
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        launchFinale();
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      countdownEl.textContent = 
+        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function launchFinale() {
+      countdownMusic.pause();
+      countdownEl.style.display = "none";
+      finalStage.style.display = "flex";
+      wallsMusic.play();
+      slideshow.play();
+
+      slideshow.onended = () => {
+        logo.classList.add('show');
+        setTimeout(() => {
+          boomSound.play();
+          message.classList.add('show');
+        }, 1500);
+      };
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+
+</body>
+</html>
