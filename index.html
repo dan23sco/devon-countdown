@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Saunton 2025 Countdown</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap');
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: black;
+      font-family: 'Cinzel', serif;
+      overflow: hidden;
+      color: orange;
+      text-align: center;
+    }
+
+    #countdown {
+      font-size: 6vw;
+      text-shadow: 0 0 10px red, 0 0 20px orange;
+      margin-top: 20vh;
+    }
+
+    #video-container, #logo, #message {
+      display: none;
+    }
+
+    #video-container {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: black;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #logo {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%) scale(0.5);
+      opacity: 0;
+      max-width: 400px;
+      transition: all 2s ease;
+      filter: drop-shadow(0 0 20px orange);
+    }
+
+    #logo.show {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    #message {
+      position: absolute;
+      bottom: 10%;
+      width: 100%;
+      font-size: 3vw;
+      white-space: pre-line;
+      opacity: 0;
+      text-shadow: 0 0 10px red, 0 0 20px orange, 0 0 30px red;
+      transition: opacity 3s ease;
+    }
+
+    #message.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="countdown"></div>
+
+  <div id="video-container">
+    <video id="slideshowVideo" src="saunton-slideshow.mp4" preload="auto" playsinline></video>
+    <img id="logo" src="logo.jpg" alt="Saunton Logo 2025" />
+    <div id="message">Coming to you\n26 September 2025</div>
+  </div>
+
+  <audio id="countdownSound" src="countdown-loop.m4a" preload="auto" loop></audio>
+  <audio id="wallsSound" src="breaking-down-walls.m4a" preload="auto"></audio>
+  <audio id="boomSound" src="cinematic-boom.mp3" preload="auto"></audio>
+
+  <script>
+    const countdownEl = document.getElementById('countdown');
+    const videoContainer = document.getElementById('video-container');
+    const video = document.getElementById('slideshowVideo');
+    const logo = document.getElementById('logo');
+    const message = document.getElementById('message');
+    const countdownSound = document.getElementById('countdownSound');
+    const wallsSound = document.getElementById('wallsSound');
+    const boomSound = document.getElementById('boomSound');
+
+    // Replace \n with line breaks
+    message.innerText = message.innerText.replace(/\\n/g, '\n');
+
+    // Target date: Friday 25 July 2025 at 1 PM
+    const targetDate = new Date("2025-07-25T13:00:00");
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        startSequence();
+        return;
+      }
+
+      const hrs = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / (1000 * 60)) % 60);
+      const secs = Math.floor((diff / 1000) % 60);
+
+      countdownEl.textContent = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function startCountdown() {
+      countdownSound.play().catch(() => console.log("Autoplay blocked"));
+      updateCountdown();
+      const interval = setInterval(() => {
+        const now = new Date();
+        if (targetDate - now <= 0) {
+          clearInterval(interval);
+        }
+        updateCountdown();
+      }, 1000);
+    }
+
+    function startSequence() {
+      // Hide countdown, stop loop sound
+      countdownEl.style.display = 'none';
+      countdownSound.pause();
+      countdownSound.currentTime = 0;
+
+      // Show video container
+      videoContainer.style.display = 'block';
+
+      // Play breaking down the walls over slideshow
+      wallsSound.play();
+      video.play();
+
+      video.onended = () => {
+        // Show logo
+        logo.classList.add('show');
+        // Boom + message after short delay
+        setTimeout(() => {
+          boomSound.play();
+          message.classList.add('show');
+        }, 1500);
+      };
+    }
+
+    window.onload = () => {
+      startCountdown();
+    };
+  </script>
+
+</body>
+</html>
